@@ -1,18 +1,19 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib import messages
 from.models import Job
+from .form import FeedBackForm
 from django.db.models import Sum
 
 # Create your views here.
 def home(request):
+    form = FeedBackForm
     jobs = Job.objects.all
-    # bytes = len(Job.objects.filter(summary=request.user))
-    # total_projects = Job.objects.filter(summary = id)
 
-    return render(request, 'projects/better.html',{"jobs":jobs})
+    if request.method == 'POST':
+        form = FeedBackForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "sent")
+            return redirect('home')
 
-def project_detail(request, pk):
-    projects = Job.objects.get(pk= pk)
-    context = {
-        'project': projects
-    }
-    return render(request, 'project/project_detail.html', context)
+    return render(request, 'projects/better.html',{"jobs":jobs, 'form':form})
